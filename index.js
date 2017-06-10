@@ -97,7 +97,7 @@ function formatReport(data) {
 function getReports(companyNames) {
   function recursiveGetReport(companyNames, i) {
     if (i < companyNames.length) {
-      getReport(companyNames[i])
+      getReport(companyNames[i], i)
         .then(() => {
           return recursiveGetReport(companyNames, i + 1);
         });
@@ -107,13 +107,14 @@ function getReports(companyNames) {
 }
 
 // Requests with JSONP approach as Glassdoor does not appear to support Cross Origin Resource Sharing.
-function getReport(company) {
+function getReport(company, i) {
   return new Promise((res, rej) => {
     if (!company) {
       res()
     } else {
       var scriptTag = document.createElement('SCRIPT');
       scriptTag.src = config.url + constructParams(company);
+      scriptTag.id = 'REQUEST' + i;
       document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
     }
 
@@ -122,6 +123,7 @@ function getReport(company) {
         if (data.response) {
           if (data.response.employers) {
             data.response.employers.forEach(saveAndDisplayReport);
+            document.getElementsByTagName('HEAD')[0].removeChild(document.getElementById('REQUEST' + i))
             res();
           }
         }
