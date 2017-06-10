@@ -74,14 +74,6 @@ function clearTableAndGetReports(e) {
   getReports(getEnteredCompanyNames());
 }
 
-function parseResponse(data) {
-  if (data.response) {
-    if (data.response.employers) {
-      data.response.employers.forEach(saveAndDisplayReport);
-    }
-  }
-}
-
 function saveAndDisplayReport(data) {
   let report = formatReport(data);
   companyReports.push(report);
@@ -103,16 +95,39 @@ function formatReport(data) {
 }
 
 function getReports(companyNames) {
-  companyNames.forEach(getReport)
+  function recursiveGetReport(companyNames, i) {
+    if (i < companyNames.length) {
+      getReport(companyNames[i])
+        .then(() => {
+          return recursiveGetReport(companyNames, i + 1);
+        });
+    }
+  }
+  recursiveGetReport(companyNames, 0);
 }
 
 // Requests with JSONP approach as Glassdoor does not appear to support Cross Origin Resource Sharing.
 function getReport(company) {
-  if (company) {
-    var scriptTag = document.createElement('SCRIPT');
-    scriptTag.src = config.url + constructParams(company);
-    document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);   
-  }
+  return new Promise((res, rej) => {
+    if (!company) {
+      res()
+    } else {
+      var scriptTag = document.createElement('SCRIPT');
+      scriptTag.src = config.url + constructParams(company);
+      document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
+    }
+
+    window['parseResponse'] = function(data) {
+      setTimeout(() => {
+        if (data.response) {
+          if (data.response.employers) {
+            data.response.employers.forEach(saveAndDisplayReport);
+            res();
+          }
+        }
+      }, 100)
+    }
+  });
 }
 
 function appendToTable(report) {
