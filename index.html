@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Document</title>
+  <style>
+    th, td {
+        border: 2px solid black;
+        padding: 5px;
+    }
+    input {
+      margin: 0px 5px 0px 5px;
+    }
+  </style>
+</head>
+<body>
+
+  <div style="padding: 20px">
+
+    <div style="display: flex; flex: 1; justify-content: center; align-items: center; flex-direction: column">
+      <header style="text-align: center">
+        <h1>Glassdoor Company Metrics Grabber<h1>
+        <h4>THIS TOOL WAS DESIGNED FOR GOOGLE CHROME USE ONLY.<h4>
+      </header>
+
+      <div>
+        <p>Set-up</p>
+        <ol>
+          <li>
+            <strong>API Key and Partner ID:</strong> Sign into Glassdoor and <a target="_blank" href="https://www.glassdoor.ca/developer/register_input.htm">complete this form</a>. You will then receive your API key and Partner ID by email.
+          </li>
+          <li>
+            <strong>Public IP:</strong> Visit <a target="_blank" href="https://www.google.ca/search?q=what%27s+my+ip">this link</a> and copy the IP address that's displayed.
+          </li>
+        </ol>
+
+        <p>Instructions:</p>
+        <ol>
+          <li>Insert API Key, Partner ID, IP and Number of Companies.</li>
+          <li>Click 'Start'.</li>
+          <li>Insert Company Names</li>
+          <li>Click 'Get Glassdoor Data'</li>
+          <li>Once table appears, Click 'Download Reports'</li>
+        </ol>
+        <p>Note: Companies with generic names may return multiple results</p>
+      </div>
+
+      <form style="padding: 20px" id="setup-form">
+
+        <label for="api-key">Enter your API Key</label>
+        <input name="api-key" id="api-key" type="text" required />
+
+        <label for="partner-id">Enter your Partner ID</label>
+        <input name="partner-id" id="partner-id" type="text" required />
+
+        <label for="ip-address">Enter your IP Address</label>
+        <input name="ip-address" id="ip-address" type="text" required />
+
+        <label for="company-count">Number of Companies</label>
+        <input name="company-count" id="company-count" type="number" value=1 min=1 max=20 />
+        <input value='Start' type="submit">
+      </form>
+
+      <form style="padding: 20px" id="company-name-form">
+      </form>
+
+      <form style="padding: 20px" id="download-form">
+        <input value="Download Reports" type="submit">
+      </form>
+
+      <table style="
+        display: table;
+      ">
+      <thead>
+        <tr>
+          <th colspan=8>GLASSDOOR DATA</th>
+        </tr>
+        <tr>
+          <th>Company Name</th>
+          <th>Culture / Values</th>
+          <th>Senior Leadership</th>
+          <th>Comp / Benefits</th>
+          <th>Career Opportunities</th>
+          <th>Work / Life Balance</th>
+          <th>CEO Approval</th>
+          <th>Overall</th>
+        </tr>
+      </thead>
+      <tbody id="data-table-body">
+      </tbody>
+      </table>
+
+      <div style="padding: 20px">
+        <a href='https://www.glassdoor.ca/index.htm'>powered by <img src='https://www.glassdoor.com/static/img/api/glassdoor_logo_80.png' title='Job Search' /></a>
+      </div>
+    </div>
+  </div>
+
+  
+  <script src="index.js"></script>
+</body>
+</html>
