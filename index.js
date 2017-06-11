@@ -60,6 +60,8 @@ function recordConfigAndInitNameForm(e) {
     'Saving Credentials to local storage failed. May be unavailable';
   }
 
+  document.getElementById('submit-setup').value = 'Update';
+
   initNameForm();
 }
 
@@ -68,7 +70,7 @@ function initNameForm() {
   for (let i = 0; i < companyCount; i++) {
     inputFields = addInputField(inputFields, i);
   }
-  forms.companyName().innerHTML = inputFields + `<input type='submit' value='Get Glassdoor Data'/>`;
+  forms.companyName().innerHTML = inputFields + `<div style="width: 100%; display: flex; justify-content: center; padding: 20px"><input type='submit' value='Get Glassdoor Data'/></div>`;
 }
 
 function addInputField(currentFields, i) {
