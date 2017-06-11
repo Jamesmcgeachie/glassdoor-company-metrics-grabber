@@ -68,7 +68,8 @@ function addInputField(currentFields, i) {
 
 function clearTableAndGetReports(e) {
   e.preventDefault();
-  clearExistingTable()
+  clearExistingTable();
+  clearErrorMessage();
   getReports(getEnteredCompanyNames());
 }
 
@@ -98,6 +99,9 @@ function getReports(companyNames) {
       getReport(companyNames[i], i)
         .then(() => {
           return recursiveGetReport(companyNames, i + 1);
+        })
+        .catch((error) => {
+          insertErrorMessage(error);
         });
     }
   }
@@ -110,10 +114,13 @@ function getReport(company, i) {
     if (!company) {
       res()
     } else {
-      var scriptTag = document.createElement('SCRIPT');
+      let scriptTag = document.createElement('SCRIPT');
       scriptTag.src = apiURL + constructParams(company);
       scriptTag.id = 'REQUEST' + i;
       document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
+      scriptTag.onerror = (event) => {
+        rej(determineErrorCause(event));
+      }
     }
 
     window['parseResponse'] = function(data) {
@@ -125,7 +132,7 @@ function getReport(company, i) {
             res();
           }
         }
-      }, 100)
+      }, 200)
     }
   });
 }
@@ -140,12 +147,35 @@ function clearExistingTable() {
   getDataTable().innerHTML = '';
 }
 
+function insertErrorMessage(error) {
+  document.getElementById('error-container').innerHTML = `<p style="background-color: red; color: white; border: 1px solid black;">${error}</p>`;
+}
+
+function clearErrorMessage(error) {
+  document.getElementById('error-container').innerHTML = '';
+}
+
 function getDataTable() {
   return document.getElementById('data-table-body');
 }
 
 function getEnteredCompanyNames() {
   return [...document.querySelectorAll('#company-name-form input[type=text]')].map((input) => { return input.value })
+}
+
+/* 
+  Difficult to get access to HTTP status code with JSONP,
+  so figuring out probable cause based on when error occured rather than HTTP response.
+*/
+function determineErrorCause(event) {
+  let requestNumber = Number(event.target.id.split('REQUEST')[1]);
+  if (!requestNumber) {
+    return 'Request Failed. Please check you entered the correct API Key, Partner ID and IP Address. Alternatively, Glassdoor may be down, or you may have been temporarily locked out due to excessive requests.';
+  } else if (requestNumber >= 1) {
+    return `Company Request ${requestNumber} Failed. You may be requesting too much data too quickly. Slow down.`;
+  } else {
+    return 'An unknown error occured.';
+  }
 }
 
 function constructParams(company) {
@@ -160,10 +190,10 @@ function constructParams(company) {
 
 function downloadReports(e) {
   e.preventDefault();
-  var headings = Object.keys(companyReports[0]).map(key => keyToHeaderMap[key]).reduce(flattenArray, '');
-  var csvFormattedData = 'data:text/csv;charset=utf-8,' + headings + '\n' + companyReports.map(convertToArray).reduce(createCSVString, '');
-  var encodedUri = encodeURI(csvFormattedData);
-  var link = document.createElement("a");
+  const headings = Object.keys(companyReports[0]).map(key => keyToHeaderMap[key]).reduce(flattenArray, '');
+  const csvFormattedData = 'data:text/csv;charset=utf-8,' + headings + '\n' + companyReports.map(convertToArray).reduce(createCSVString, '');
+  let encodedUri = encodeURI(csvFormattedData);
+  let link = document.createElement("a");
   link.setAttribute("href", encodedUri);
   link.setAttribute("download", "glassdoor_company_data.csv");
   document.body.appendChild(link);
