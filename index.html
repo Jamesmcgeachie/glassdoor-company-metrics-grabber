@@ -54,7 +54,7 @@
         <input name="partner-id" id="partner-id" type="text" required />
 
         <label for="ip-address">Enter your IP Address</label>
-        <input name="ip-address" id="ip-address" type="text" required />
+        <input name="ip-address" id="ip-address" type="text" required pattern="^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])$"/>
 
         <label for="company-count">Number of Companies</label>
         <input name="company-count" id="company-count" type="number" value=1 min=1 max=20 />
@@ -63,6 +63,9 @@
 
       <form style="padding: 20px" id="company-name-form">
       </form>
+
+      <div id="error-container" style="display: flex; justify-content: center">
+      </div>
 
       <form style="padding: 20px" id="download-form">
         <input value="Download Reports" type="submit">
