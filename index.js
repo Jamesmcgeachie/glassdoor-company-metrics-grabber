@@ -35,8 +35,8 @@ document.onreadystatechange = function () {
 
 function initApplication() {
   try {
-    document.getElementById('api-key').value = window.localStorage.getItem('api-key');
-    document.getElementById('partner-id').value = window.localStorage.getItem('partner-id');
+    document.getElementById('api-key').value = window.localStorage.getItem('glassdoor-api-key');
+    document.getElementById('partner-id').value = window.localStorage.getItem('glassdoor-partner-id');
   } catch(e) {
     console.error('Retrieving credentials from local storage failed. May be unavailable', e);
   }
@@ -54,8 +54,8 @@ function recordConfigAndInitNameForm(e) {
   config['userip'] = document.getElementById('ip-address').value;
 
   try {
-    window.localStorage.setItem('api-key', config['t.k']);
-    window.localStorage.setItem('partner-id', config['t.p']);
+    window.localStorage.setItem('glassdoor-api-key', config['t.k']);
+    window.localStorage.setItem('glassdoor-partner-id', config['t.p']);
   } catch(e) {
     console.error('Saving credentials to local storage failed. May be unavailable', e);
   }
