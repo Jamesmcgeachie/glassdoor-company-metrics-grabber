@@ -240,7 +240,10 @@ function createCSVString(accumulator, value, index, reports) {
 }
 
 function flattenArray(a, v, i, arr) {
-  const safeV = v ? v : 'N/A';
+  let safeV = v ? v : 'N/A';
+  if (typeof safeV === 'string' && safeV.indexOf(',') > -1) {
+    safeV = '"' + safeV + '"';  
+  }
   return i < arr.length ? a + safeV + ',' : a + safeV 
 }
 
