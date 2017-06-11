@@ -201,7 +201,7 @@ function determineErrorCause(event) {
   if (!requestNumber) {
     return 'Request Failed. Please check you entered the correct API Key, Partner ID and IP Address. Alternatively, Glassdoor may be down, or you may have been temporarily locked out due to excessive requests.';
   } else if (requestNumber >= 1) {
-    return `Company Request ${requestNumber} Failed. You may be requesting too much data too quickly. Slow down.`;
+    return `Company Request ${requestNumber + 1} Failed. You may be requesting too much data too quickly. Slow down.`;
   } else {
     return 'An unknown error occured.';
   }
