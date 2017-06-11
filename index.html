@@ -18,16 +18,29 @@
       position: absolute;
       right: 0;
     }
+    .tool-container {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+    .tool {
+      max-width: 90%;
+    }
+    .setup-form {
+      padding: 20px;
+    }
+    .usage-notes li {
+      font-size: 12px;
+      margin-bottom: 5px;
+    }
   </style>
 </head>
 <body>
 
-  <div style="padding: 20px">
-
-    <div style="display: flex; flex: 1; justify-content: center; align-items: center; flex-direction: column">
+  <div class="tool-container">
+    <div class="tool" style="display: flex; flex: 1; justify-content: center; align-items: center; flex-direction: column">
       <header style="text-align: center">
         <h1>Glassdoor Company Metrics Grabber<h1>
-        <h4>This tool was designed for Google Chrome Use. It should also work in Safari or Firefox. IT WILL NOT WORK on Internet Explorer.<h4>
       </header>
 
       <div>
@@ -45,14 +58,27 @@
         <ol>
           <li>Insert API Key, Partner ID, IP and Number of Companies.</li>
           <li>Click 'Start'.</li>
-          <li>Insert Company Names</li>
+          <li>Insert Company Names and cities (optional)</li>
           <li>Click 'Get Glassdoor Data'</li>
           <li>Once table appears, Click 'Download Reports'</li>
         </ol>
-        <p>Note: Companies with generic names may return multiple results</p>
+
+        <p>Usage Notes:</p> 
+        <ul class="usage-notes">
+          <li>
+            This tool was designed for Desktop Google Chrome Use. May not work on Internet Explorer and will not work on mobile.
+          </li>
+          <li>
+            Common names will return multiple matches. Use exact name and city to prioritise correct company. 
+          </li>
+          <li>
+            <span style="color: red; font-weight: bold">Warning</span>: If using 'Save Videogame Companies Only', note that not all companies have marked the correct industry, so you may miss data.
+          </li>
+
+        </ul>
       </div>
 
-      <form style="padding: 20px" id="setup-form">
+      <form class="setup-form" id="setup-form">
 
         <label for="api-key">Enter your API Key</label>
         <input name="api-key" id="api-key" type="text" required />
@@ -65,6 +91,7 @@
 
         <label for="company-count">Number of Companies</label>
         <input name="company-count" id="company-count" type="number" value=1 min=1 max=20 />
+
         <input id="submit-setup" value='Start' type="submit">
       </form>
 
@@ -78,7 +105,6 @@
       </div>
 
       <form style="padding: 20px" id="download-form">
-        <input value="Download Reports" type="submit">
       </form>
 
       <table style="

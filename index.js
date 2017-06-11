@@ -76,9 +76,11 @@ function initNameForm() {
 function addInputField(currentFields, i) {
   return `
     ${currentFields}
-    <fieldset style='margin: 5px;'>
+    <fieldset class="company-details" style='margin: 5px;'>
       <label for='company-name-${i}'>Company Name</label>
-      <input name='company-name-${i}' id='company-name-${i}' type='text' plaeholder='Enter Company Name'/>
+      <input name='company-name-${i}' id='company-name-${i}' type='text' plaeholder='Enter Company Name' required/>
+      <label for='company-city-${i}'>Company City</label>
+      <input name='company-city-${i}' id='company-city-${i}' type='text' plaeholder='Enter Company City'/>
     </fieldset>
   `
 }
@@ -88,7 +90,7 @@ function clearTableAndGetReports(e) {
   clearExistingTable();
   clearErrorMessage();
   showLoadingIndicator();
-  getReports(getEnteredCompanyNames());
+  getReports(getEnteredCompanies());
 }
 
 function saveAndDisplayReport(data) {
@@ -106,33 +108,35 @@ function formatReport(data) {
     careerOpportunitiesRating: data.careerOpportunitiesRating,
     workLifeBalanceRating: data.workLifeBalanceRating,
     ceoApproval: data.ceo ? data.ceo.pctApprove : undefined,
-    overallRating: data.overallRating
+    overallRating: data.overallRating,
+    industry: data.industry
   }
   return report;
 }
 
-function getReports(companyNames) {
-  function recursiveGetReport(companyNames, i) {
-    if (i < companyNames.length) {
-      getReport(companyNames[i], i)
+function getReports(companies) {
+  function recursiveGetReport(companies, i) {
+    if (i < companies.length) {
+      getReport(companies[i], i)
         .then(() => {
-          return recursiveGetReport(companyNames, i + 1);
+          return recursiveGetReport(companies, i + 1);
         })
         .catch((error) => {
           insertErrorMessage(error);
           clearLoadingIndicator();
         });
     } else {
+      insertDownloadOptions();
       clearLoadingIndicator();
     }
   }
-  recursiveGetReport(companyNames, 0);
+  recursiveGetReport(companies, 0);
 }
 
 // Requests with JSONP approach as Glassdoor does not appear to support Cross Origin Resource Sharing.
 function getReport(company, i) {
   return new Promise((res, rej) => {
-    if (!company) {
+    if (!company && !company.name) {
       res()
     } else {
       let scriptTag = document.createElement('SCRIPT');
@@ -164,12 +168,20 @@ function appendToTable(report) {
   newRow.innerHTML = renderResponseRow(report);
 }
 
+function insertDownloadOptions() {
+  forms.downloadForm().innerHTML = `
+    <label for="video-game-toggle">Save Videogame Companies Only? (Experimental)</label>
+    <input type="checkbox" value="false" id="video-game-toggle" name="video-game-toggle"/>
+    <input value="Download Reports" type="submit">
+  `
+}
+
 function clearExistingTable() {
   getDataTable().innerHTML = '';
 }
 
 function showLoadingIndicator() {
-  document.getElementById('loading-container').innerHTML = `<p style="background-color: cyan; color: white; border: 1px solid black;">Downloading Data...</p>`;
+  document.getElementById('loading-container').innerHTML = `<p style="background-color: navy; color: white; border: 1px solid black; padding: 5px;">Downloading Data...</p>`;
 }
 
 function insertErrorMessage(error) {
@@ -188,8 +200,14 @@ function getDataTable() {
   return document.getElementById('data-table-body');
 }
 
-function getEnteredCompanyNames() {
-  return [...document.querySelectorAll('#company-name-form input[type=text]')].map((input) => { return input.value })
+function getEnteredCompanies() {
+  return [...document.querySelectorAll('#company-name-form .company-details')].map((fieldset) => { 
+    const inputs = [...fieldset.querySelectorAll('input[type="text"')];
+    return {
+      name: inputs[0].value,
+      city: inputs[1].value
+    }
+  })
 }
 
 /* 
@@ -209,30 +227,47 @@ function determineErrorCause(event) {
 
 function constructParams(company) {
   return Object.keys(config)
-    .map((key, i ) => { 
-      return i === 0 ? `?${key}=${config[key]}` : `&${key}=${config[key]}`
-    })
-    .reduce((acc, value) => {
-      return acc + value;
-    }, '') + `&q=${company}`;
+    .map((key, i ) => { return i === 0 ? `?${key}=${config[key]}` : `&${key}=${config[key]}`})
+    .reduce((acc, value) => { return acc + value }, '')
+    + `&q=${company.name ? company.name : ''}&l=${company.city ? company.city : ''}`;
 }
 
 function downloadReports(e) {
   e.preventDefault();
-  const headings = Object.keys(companyReports[0]).map(key => keyToHeaderMap[key]).reduce(flattenArray, '');
-  const csvFormattedData = 'data:text/csv;charset=utf-8,' + headings + '\n' + companyReports.map(convertToArray).reduce(createCSVString, '');
-  let encodedUri = encodeURI(csvFormattedData);
-  let link = document.createElement("a");
-  link.setAttribute("href", encodedUri);
-  link.setAttribute("download", "glassdoor_company_data.csv");
-  document.body.appendChild(link);
-  link.click();
+  if (companyReports.length) {
+    const headings = Object.keys(companyReports[0]).filter(desiredKeysOnly).map(key => keyToHeaderMap[key]).reduce(flattenArray, '');
+    const shouldOnlyDisplayVideoGames = document.getElementById('video-game-toggle').checked;
+    console.log('Games only', shouldOnlyDisplayVideoGames);
+    let csvFormattedData = 'data:text/csv;charset=utf-8,' + headings + '\n';
+
+    if (shouldOnlyDisplayVideoGames) {
+      csvFormattedData = csvFormattedData + companyReports.filter(isVideoGameIndustry).map(convertToArray).reduce(createCSVString, '');
+    } else {
+      csvFormattedData = csvFormattedData + companyReports.map(convertToArray).reduce(createCSVString, '');
+    }
+    
+    let encodedUri = encodeURI(csvFormattedData);
+    let link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", "glassdoor_company_data.csv");
+    document.body.appendChild(link);
+    link.click();    
+  }
+}
+
+function isVideoGameIndustry(employer) {
+  return employer.industry === 'Video Games';
 }
 
 function convertToArray(report) {
   let values = [];
-  Object.keys(report).forEach(key => values.push(report[key]));
+  Object.keys(report).filter(desiredKeysOnly).forEach(key => values.push(report[key]));
   return values;
+}
+
+// Remove keys that we don't want in the dataset
+function desiredKeysOnly(key) {
+  return key !== 'industry'
 }
 
 function createCSVString(accumulator, value, index, reports) {
