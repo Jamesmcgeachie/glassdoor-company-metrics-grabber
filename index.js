@@ -38,7 +38,7 @@ function initApplication() {
     document.getElementById('api-key').value = window.localStorage.getItem('api-key');
     document.getElementById('partner-id').value = window.localStorage.getItem('partner-id');
   } catch(e) {
-    'Retrieving credentials from local storage failed. May be unavailable';
+    console.error('Retrieving credentials from local storage failed. May be unavailable', e);
   }
 
   forms.setupForm().addEventListener('submit', recordConfigAndInitNameForm);
@@ -57,7 +57,7 @@ function recordConfigAndInitNameForm(e) {
     window.localStorage.setItem('api-key', config['t.k']);
     window.localStorage.setItem('partner-id', config['t.p']);
   } catch(e) {
-    'Saving Credentials to local storage failed. May be unavailable';
+    console.error('Saving credentials to local storage failed. May be unavailable', e);
   }
 
   document.getElementById('submit-setup').value = 'Update';
