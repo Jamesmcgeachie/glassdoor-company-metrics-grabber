@@ -1,23 +1,21 @@
-let forms = {
+const forms = {
   setupForm: () => { return document.getElementById("setup-form")},
   companyName: () => { return document.getElementById("company-name-form")},
   downloadForm: () => { return document.getElementById("download-form")}
 }
-
+const apiURL = 'http://api.glassdoor.com/api/api.htm'
+let companyCount = 1;
 let config = {
-  'v': 1,
+  'v': 1, // api version
   'format': 'json',
-  't.p': '',
-  't.k': '',
-  'userip': '',
+  't.p': '', // partner id
+  't.k': '', // api key
+  'userip': '', // user's ip address
   'useragent': navigator.userAgent,
   'action': 'employers',
-  'url': 'http://api.glassdoor.com/api/api.htm',
-  'count': 1
+  'callback': 'parseResponse' // jsonp callback function name
 }
-
 let companyReports = [];
-
 let keyToHeaderMap = {
   name: 'Name',
   cultureAndValuesRating: 'Culture and Values',
@@ -43,7 +41,7 @@ function initApplication() {
 
 function recordConfigAndInitNameForm(e) {
   e.preventDefault();
-  config['count'] = Number(document.getElementById('company-count').value);
+  companyCount = Number(document.getElementById('company-count').value);
   config['t.k'] = document.getElementById('api-key').value;
   config['t.p'] = document.getElementById('partner-id').value;
   config['userip'] = document.getElementById('ip-address').value;
@@ -52,7 +50,7 @@ function recordConfigAndInitNameForm(e) {
 
 function initNameForm() {
   let inputFields = '';
-  for (let i = 0; i < config.count; i++) {
+  for (let i = 0; i < companyCount; i++) {
     inputFields = addInputField(inputFields, i);
   }
   forms.companyName().innerHTML = inputFields + `<input type='submit' value='Get Glassdoor Data'/>`;
@@ -113,7 +111,7 @@ function getReport(company, i) {
       res()
     } else {
       var scriptTag = document.createElement('SCRIPT');
-      scriptTag.src = config.url + constructParams(company);
+      scriptTag.src = apiURL + constructParams(company);
       scriptTag.id = 'REQUEST' + i;
       document.getElementsByTagName('HEAD')[0].appendChild(scriptTag);
     }
@@ -151,7 +149,13 @@ function getEnteredCompanyNames() {
 }
 
 function constructParams(company) {
-  return `?t.p=${config['t.p']}&t.k=${config['t.k']}&userip=${config['userip']}&useragent=${config['useragent']}&format=${config['format']}&v=${config['v']}&action=${config['action']}&q=${company}&callback=parseResponse`
+  return Object.keys(config)
+    .map((key, i ) => { 
+      return i === 0 ? `?${key}=${config[key]}` : `&${key}=${config[key]}`
+    })
+    .reduce((acc, value) => {
+      return acc + value;
+    }, '') + `&q=${company}`;
 }
 
 function downloadReports(e) {
