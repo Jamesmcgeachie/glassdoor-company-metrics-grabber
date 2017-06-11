@@ -34,6 +34,13 @@ document.onreadystatechange = function () {
 }
 
 function initApplication() {
+  try {
+    document.getElementById('api-key').value = window.localStorage.getItem('api-key');
+    document.getElementById('partner-id').value = window.localStorage.getItem('partner-id');
+  } catch(e) {
+    'Retrieving credentials from local storage failed. May be unavailable';
+  }
+
   forms.setupForm().addEventListener('submit', recordConfigAndInitNameForm);
   forms.companyName().addEventListener('submit', clearTableAndGetReports);
   forms.downloadForm().addEventListener('submit', downloadReports);
@@ -45,6 +52,14 @@ function recordConfigAndInitNameForm(e) {
   config['t.k'] = document.getElementById('api-key').value;
   config['t.p'] = document.getElementById('partner-id').value;
   config['userip'] = document.getElementById('ip-address').value;
+
+  try {
+    window.localStorage.setItem('api-key', config['t.k']);
+    window.localStorage.setItem('partner-id', config['t.p']);
+  } catch(e) {
+    'Saving Credentials to local storage failed. May be unavailable';
+  }
+
   initNameForm();
 }
 
@@ -70,6 +85,7 @@ function clearTableAndGetReports(e) {
   e.preventDefault();
   clearExistingTable();
   clearErrorMessage();
+  showLoadingIndicator();
   getReports(getEnteredCompanyNames());
 }
 
@@ -102,7 +118,10 @@ function getReports(companyNames) {
         })
         .catch((error) => {
           insertErrorMessage(error);
+          clearLoadingIndicator();
         });
+    } else {
+      clearLoadingIndicator();
     }
   }
   recursiveGetReport(companyNames, 0);
@@ -147,12 +166,20 @@ function clearExistingTable() {
   getDataTable().innerHTML = '';
 }
 
+function showLoadingIndicator() {
+  document.getElementById('loading-container').innerHTML = `<p style="background-color: cyan; color: white; border: 1px solid black;">Downloading Data...</p>`;
+}
+
 function insertErrorMessage(error) {
   document.getElementById('error-container').innerHTML = `<p style="background-color: red; color: white; border: 1px solid black;">${error}</p>`;
 }
 
 function clearErrorMessage(error) {
   document.getElementById('error-container').innerHTML = '';
+}
+
+function clearLoadingIndicator(error) {
+  document.getElementById('loading-container').innerHTML = '';
 }
 
 function getDataTable() {
