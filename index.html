@@ -11,6 +11,13 @@
     input {
       margin: 0px 5px 0px 5px;
     }
+    input::-webkit-contacts-auto-fill-button {
+      visibility: hidden;
+      display: none !important;
+      pointer-events: none;
+      position: absolute;
+      right: 0;
+    }
   </style>
 </head>
 <body>
@@ -20,7 +27,7 @@
     <div style="display: flex; flex: 1; justify-content: center; align-items: center; flex-direction: column">
       <header style="text-align: center">
         <h1>Glassdoor Company Metrics Grabber<h1>
-        <h4>THIS TOOL WAS DESIGNED FOR GOOGLE CHROME USE ONLY.<h4>
+        <h4>This tool was designed for Google Chrome Use. It should also work in Safari or Firefox. It has not been tested in IE.<h4>
       </header>
 
       <div>
